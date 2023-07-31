@@ -1,9 +1,9 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
-import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
-import Pages from "vite-plugin-pages";
-import Layouts from "vite-plugin-vue-layouts";
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import Pages from 'vite-plugin-pages'
+import Layouts from 'vite-plugin-vue-layouts'
 
 export default defineConfig({
   main: {
@@ -15,8 +15,8 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        "@renderer": resolve("src/renderer/src"),
-        "@": resolve("src/renderer/src")
+        '@renderer': resolve('src/renderer/src'),
+        '@': resolve('src/renderer/src')
       }
     },
     plugins: [

@@ -13,10 +13,10 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:win": "yarn build && electron-builder --win --config",
-    "build:mac": "yarn build && electron-builder --mac --config",
-    "build:linux": "yarn build && electron-builder --linux --config",
-    "build:all": "yarn build && electron-builder --linux --config && electron-builder --mac --config && electron-builder --win --config"
+    "build:win": "yarn build && electron-builder --win --config --x64",
+    "build:mac": "yarn build && electron-builder --mac --config --arm64",
+    "build:linux": "yarn build && electron-builder --linux --config --x64",
+    "build:all": "yarn build && electron-builder --linux --config --x64 && electron-builder --win --config --x64 && electron-builder --mac --config --arm64"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
@@ -37,7 +37,7 @@
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-prettier": "^7.1.0",
     "electron": "^24.6.2",
-    "electron-builder": "^23.6.0",
+    "electron-builder": "v22.10.5",
     "electron-vite": "^1.0.25",
     "eslint": "^8.44.0",
     "eslint-plugin-vue": "^9.15.1",

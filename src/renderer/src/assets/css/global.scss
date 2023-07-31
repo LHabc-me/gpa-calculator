@@ -1,0 +1,58 @@
+@use 'vuetify';
+//@import 'flex-layout-attribute/css/flex-layout-attribute.min.css';
+@import 'vue-toast-notification/dist/theme-default.css';
+//@import 'nprogress/nprogress.css';
+
+* {
+  margin: 0;
+  border: 0;
+  //border: red solid 2px;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.link-color {
+  color: rgba(var(--v-theme-primary), 0.8);
+
+  &:hover {
+    color: rgba(var(--v-theme-primary));
+  }
+}
+
+a {
+  text-decoration: none;
+  color: rgba(var(--v-theme-primary), 0.8);
+
+  &:hover {
+    color: rgba(var(--v-theme-primary));
+  }
+}
+
+.primary-color {
+  color: rgba(var(--v-theme-primary));
+}
+
+.primary-color-hover {
+  &:hover {
+    color: rgba(var(--v-theme-primary));
+  }
+}
+
+.mouse-pointer {
+  cursor: pointer;
+}
+
+.mouse-normal {
+  cursor: default;
+}
+
+.centered-input input {
+  text-align: center
+}
+
+.dark {
+  filter: invert(93%);
+}
+

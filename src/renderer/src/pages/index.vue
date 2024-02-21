@@ -15,7 +15,7 @@
       <!--      ></VIcon>-->
       <div style="margin-top: 200px">
         <div class="d-flex mx-auto" style="width: 150px">
-          <span class="text-center justify-center mx-auto"> 版本 1.0.0</span>
+          <span class="text-center justify-center mx-auto"> 版本 1.0.1</span>
           <VIcon
             style="margin-top: -10px"
             icon="mdi-github"
@@ -34,7 +34,7 @@
 
 <script setup>
 function githubClick() {
-  window.open('https://github.com/LHabc-me/gpa-calculator')
+  window.open("https://github.com/LHabc-me/gpa-calculator");
 }
 </script>
 

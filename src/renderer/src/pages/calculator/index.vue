@@ -1,11 +1,11 @@
 <template>
-  <div class="pa-10">
+  <div class="pa-10 pt-5">
     <VRow>
       <VCol :cols="4">
         <VBtn :block="true" color="primary" @click="addLine">新增</VBtn>
       </VCol>
       <VCol :cols="4">
-        <VBtn :block="true" color="error" @click="deleteLine">删除</VBtn>
+        <VBtn :block="true" color="error" @click="deleteLine">删除选中行</VBtn>
       </VCol>
       <VCol :cols="4">
         <VBtn :block="true" color="success" @click="uploadFileInput.click()">从文件导入</VBtn>
@@ -29,6 +29,10 @@
       </div>
     </VRow>
     <VRow>
+      <VBtn color="primary" variant="text" @click="selectAll">选择全部</VBtn>
+      <VBtn color="primary" variant="text" @click="unselectAll">取消全部</VBtn>
+    </VRow>
+    <VRow>
       <VCol :cols="2.4">行号</VCol>
       <VCol :cols="2.4">课程名</VCol>
       <VCol :cols="2.4">总成绩</VCol>
@@ -36,7 +40,17 @@
       <VCol :cols="2.4">绩点</VCol>
     </VRow>
     <VRow v-for="(item, index) in lines.list" :key="index">
-      <VCol :cols="2.4"> {{ index + 1 }}</VCol>
+      <VCol :cols="2.4">
+        <div style="margin-top: -20px;display: flex;flex-direction: row;justify-content: flex-start;align-items: center;">
+          <v-checkbox v-model="item.checked"
+                      label=""
+                      color="primary"
+                      hide-details />
+          <div style="flex: 100">
+            {{ index + 1 }}
+          </div>
+        </div>
+      </VCol>
       <VCol :cols="2.4">
         <VTextField
           v-model="item.course"
@@ -85,8 +99,11 @@
 
     <VDialog v-model="dialog.show" width="500">
       <VCard>
-        <VTextField v-model="dialog.content" color="primary" label="行号"></VTextField>
-        <div style="opacity: 0.7">
+        <VTextField v-model="dialog.content" color="primary" label="行号" v-if="dialog.action === 'add'"></VTextField>
+        <div v-if="dialog.action === 'delete'" style="text-align: center;margin-top: 20px;font-size: 20px">
+          确定要删除吗？
+        </div>
+        <div style="opacity: 0.7" v-if="dialog.action === 'add'">
           注：行号支持以下格式<br />
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7表示第7行<br />
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*表示所有行<br />
@@ -104,105 +121,124 @@
   </div>
 </template>
 <script setup>
-import { dialogConfirm } from '../../utils/dialogConfirm'
-import { ref, computed } from 'vue'
-import { useRules } from '../../store/modules/rules'
-import { useCalculatorList } from '../../store/modules/calculatorList'
-import * as XLSX from 'xlsx'
+import { dialogConfirm } from "../../utils/dialogConfirm";
+import { ref, computed } from "vue";
+import { useRules } from "../../store/modules/rules";
+import { useCalculatorList } from "../../store/modules/calculatorList";
+import * as XLSX from "xlsx";
 
-const uploadFileInput = ref(null)
+const uploadFileInput = ref(null);
 
 function onUploadFileInputChange(event) {
-  let file = event.target.files[0]
-  const fileReader = new FileReader()
+  let file = event.target.files[0];
+  const fileReader = new FileReader();
   fileReader.onload = (ev) => {
-    const data = ev.target.result
+    const data = ev.target.result;
     const workbook = XLSX.read(data, {
-      type: 'binary'
-    })
-    const wsname = workbook.SheetNames[0] //取第一张表
-    const ws = XLSX.utils.sheet_to_json(workbook.Sheets[wsname]) //生成json表格内容
+      type: "binary"
+    });
+    const wsname = workbook.SheetNames[0]; //取第一张表
+    const ws = XLSX.utils.sheet_to_json(workbook.Sheets[wsname]); //生成json表格内容
     for (const item of ws) {
       lines.list.push({
-        course: item['课程名'],
-        score: item['总成绩'],
-        credit: item['学分'],
-        gpa: item['绩点']
-      })
+        course: item["课程名"],
+        score: item["总成绩"],
+        credit: item["学分"],
+        gpa: item["绩点"],
+        checked: false
+      });
     }
-  }
-  fileReader.readAsBinaryString(file)
+  };
+  fileReader.readAsBinaryString(file);
 }
 
-const rules = useRules()
+const rules = useRules();
 const GPA = computed(() => {
   //根据学分计算平均绩点
-  let sum = 0
-  let creditSum = 0
+  let sum = 0;
+  let creditSum = 0;
   for (const item of lines.list) {
-    console.log(item)
-    let gpa = null
-    let credit = null
-    let score = null
+    console.log(item);
+    let gpa = null;
+    let credit = null;
+    let score = null;
 
     if (!item.credit) {
-      continue
+      continue;
     } else {
-      credit = Number(item.credit)
+      credit = Number(item.credit);
     }
     if (item.score === undefined && item.gpa === undefined) {
-      continue
+      continue;
     } else {
       if (item.score !== undefined) {
-        const index = item.score.toString().indexOf('.') ?? item.score.toString().length
-        score = Math.floor(Number(item.score.toString().slice(0, index + 7))) ?? null
+        const index = item.score.toString().indexOf(".") ?? item.score.toString().length;
+        score = Math.floor(Number(item.score.toString().slice(0, index + 7))) ?? null;
       }
       if (item.gpa !== undefined) {
-        gpa = Number(item.gpa) ?? null
+        gpa = Number(item.gpa) ?? null;
       }
     }
 
     if (gpa !== null) {
-      sum += gpa * credit
-      creditSum += credit
+      sum += gpa * credit;
+      creditSum += credit;
     } else if (credit !== null) {
-      const rule = rules.list.find((rule) => rule.scoreFrom <= score && score <= rule.scoreTo)
+      const rule = rules.list.find((rule) => rule.scoreFrom <= score && score <= rule.scoreTo);
       if (rule) {
-        sum += Number(rule.gpa) * credit
-        creditSum += credit
+        sum += Number(rule.gpa) * credit;
+        creditSum += credit;
       }
     }
   }
-  const result = sum / creditSum
+  const result = sum / creditSum;
   if (isNaN(result)) {
-    return '-'
+    return "-";
   }
-  return result.toFixed(6)
-})
+  return result.toFixed(6);
+});
 
-const lines = useCalculatorList()
+const lines = useCalculatorList();
 
 const dialog = ref({
   show: false,
   /** @type{""|"add"|"delete"} */
-  action: '',
-  content: ''
-})
+  action: "",
+  content: ""
+});
 
 function addLine() {
-  dialog.value.content = (lines.list.length + 1).toString()
-  dialog.value.action = 'add'
-  dialog.value.show = true
+  dialog.value.content = (lines.list.length + 1).toString();
+  dialog.value.action = "add";
+  dialog.value.show = true;
 }
 
 function deleteLine() {
-  dialog.value.content = ''
-  dialog.value.action = 'delete'
-  dialog.value.show = true
+  dialog.value.content = "";
+  dialog.value.action = "delete";
+  dialog.value.show = true;
 }
 
 function dialogClick() {
-  dialogConfirm(dialog.value, lines)
+  if (dialog.value.action === "delete") {
+    dialog.value.content = lines.list
+      .map((item, index) => item.checked ? index + 1 : null)
+      .filter(item => item !== null)
+      .join(",");
+  }
+  dialogConfirm(dialog.value, lines);
+}
+
+function selectAll() {
+  for (const item of lines.list) {
+    item.checked = true;
+  }
+}
+
+function unselectAll() {
+  for (const item of lines.list) {
+    item.checked = false;
+  }
 }
 </script>
 
